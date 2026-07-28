@@ -1,21 +1,16 @@
 #!/bin/bash
 set -e
 
-echo "=== Initializing Local Git Repository ==="
-if [ ! -d .git ]; then
-    git init
-    git branch -M main
-fi
-
-echo "=== Adding project files ==="
+echo "=== Staging and committing files ==="
 git add .
+git commit -m "Initial commit of epark: Urban Mobility System by Manish" || echo "No changes to commit"
 
-echo "=== Creating initial commit ==="
-git commit -m "Initial commit of epark: Urban Mobility System by Manish" || echo "No changes to commit or already committed."
+echo "=== Configuring Git to use GitHub CLI credentials helper ==="
+gh auth setup-git
 
-echo "=== Creating GitHub repository and pushing ==="
-# Creates a public repository on the authenticated GitHub account (Saurabhyadav0)
-# and pushes the main branch to it
-gh repo create ncc-epark --public --source=. --remote=origin --push
+echo "=== Setting remote origin to HTTPS ==="
+git remote set-url origin https://github.com/Saurabhyadav0/ncc-epark.git || git remote add origin https://github.com/Saurabhyadav0/ncc-epark.git
 
-echo "=== Push to GitHub complete! ==="
+echo "=== Pushing to GitHub (HTTPS) ==="
+git push -u origin main
+echo "=== Push complete! ==="

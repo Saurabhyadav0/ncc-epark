@@ -1,0 +1,34 @@
+# Next.js build and cache outputs
+.next/
+out/
+build/
+
+# Dependency directories
+node_modules/
+jspm_packages/
+web_modules/
+
+# Local env files
+.env*.local
+.env
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs/
+*.log
+
+# IDE files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

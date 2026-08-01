@@ -59,14 +59,13 @@ export default function Footer() {
           <div className="space-y-2.5 text-xs">
             <div className="flex items-start space-x-2">
               <span className="font-semibold text-slate-800 dark:text-slate-300 min-w-[70px]">Developer:</span>
-              <span className="text-slate-600 dark:text-slate-400">Manish (HR23SDA011018)</span>
+              <span className="text-slate-600 dark:text-slate-400">Saurabh Yadav (HR2024SDIA5640781)</span>
             </div>
             <div className="flex items-start space-x-2">
               <School className="h-4 w-4 text-slate-400 mt-0.5" />
               <div>
                 <p className="font-semibold text-slate-800 dark:text-slate-300">Institute Details:</p>
-                <p className="text-slate-500 dark:text-slate-400">MDU (UIET-BCA)</p>
-                <p className="text-slate-500 dark:text-slate-400 font-medium">IIT Madras (BS in Data Science)</p>
+                <p className="text-slate-500 dark:text-slate-400">MDU (UIET - B.Tech Computer Science)</p>
               </div>
             </div>
             <div className="flex items-start space-x-2">

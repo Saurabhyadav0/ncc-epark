@@ -97,8 +97,8 @@ export default function Home() {
             <div className="flex items-center space-x-2.5">
               <School className="h-5 w-5 text-emerald-500" />
               <div>
-                <p className="font-semibold text-slate-900 dark:text-slate-100">UIET - MDU & IIT Madras</p>
-                <p className="text-[10px] text-slate-400">BCA & BS (Data Science)</p>
+                <p className="font-semibold text-slate-900 dark:text-slate-100">UIET - MDU</p>
+                <p className="text-[10px] text-slate-400">B.Tech Computer Science</p>
               </div>
             </div>
             <div className="flex items-center space-x-2.5">

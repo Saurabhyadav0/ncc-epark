@@ -30,6 +30,7 @@ model ParkingSpot {
   latitude    Float
   longitude   Float
   status      String   @default("AVAILABLE") // AVAILABLE, OCCUPIED
+  hasEv       Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

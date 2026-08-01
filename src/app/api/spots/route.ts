@@ -7,8 +7,12 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   try {
     const spots = await prisma.parkingSpot.findMany({
-      where: { status: "AVAILABLE" }
+      where: {
+        status: "AVAILABLE",
+      },
+      orderBy: { createdAt: 'desc' }
     });
+
     return NextResponse.json(spots);
   } catch (error) {
     console.error("Fetch spots error:", error);
@@ -23,8 +27,7 @@ export async function POST(request: Request) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const data = await request.json();
-    const { title, description, address, phone, price, latitude, longitude } = data;
+    const { title, description, address, phone, price, latitude, longitude, hasEv } = await request.json();
 
     if (!title || !price || !latitude || !longitude || !address || !phone) {
       return new NextResponse("Missing required fields", { status: 400 });
@@ -46,6 +49,7 @@ export async function POST(request: Request) {
         price: Number(price),
         latitude: Number(latitude),
         longitude: Number(longitude),
+        hasEv: Boolean(hasEv),
         ownerId: owner.id,
       }
     });

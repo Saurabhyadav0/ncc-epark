@@ -3,6 +3,8 @@ import Razorpay from "razorpay";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: Request) {
   try {
     const { userId } = auth();

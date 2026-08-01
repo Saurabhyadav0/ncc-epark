@@ -27,6 +27,7 @@ export default function OwnerPortal() {
   const [newRate, setNewRate] = useState("");
   const [newAddress, setNewAddress] = useState("");
   const [newPhone, setNewPhone] = useState("");
+  const [hasEv, setHasEv] = useState(false);
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
@@ -81,7 +82,8 @@ export default function OwnerPortal() {
           phone: newPhone,
           price: newRate,
           latitude: lat,
-          longitude: lng
+          longitude: lng,
+          hasEv
         })
       });
 
@@ -90,6 +92,7 @@ export default function OwnerPortal() {
         setNewRate("");
         setNewAddress("");
         setNewPhone("");
+        setHasEv(false);
         toast.success("Spot created successfully!");
         fetchData();
       } else {
@@ -330,6 +333,19 @@ export default function OwnerPortal() {
                       required
                     />
                     <p className="text-[10px] text-slate-400">Only shared with drivers *after* you accept their booking.</p>
+                  </div>
+
+                  <div className="flex items-center space-x-2 py-2">
+                    <input
+                      type="checkbox"
+                      id="hasEv"
+                      checked={hasEv}
+                      onChange={(e) => setHasEv(e.target.checked)}
+                      className="w-4 h-4 text-accent border-slate-300 rounded focus:ring-accent"
+                    />
+                    <label htmlFor="hasEv" className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center">
+                      <span className="mr-1">⚡</span> Has EV Charging Port
+                    </label>
                   </div>
 
                   <Button type="submit" variant="accent" disabled={isSubmitting} className="w-full bg-accent hover:bg-accent-dark font-semibold mt-2">

@@ -11,6 +11,7 @@ interface MarkerData {
   status?: "available" | "occupied";
   price?: number;
   info?: string;
+  hasEv?: boolean;
 }
 
 interface MapProps {

@@ -11,6 +11,7 @@ interface MarkerData {
   status?: "available" | "occupied";
   price?: number;
   info?: string;
+  hasEv?: boolean;
 }
 
 interface LeafletMapProps {
@@ -75,7 +76,7 @@ export default function LeafletMap({ center, zoom, markers, onMarkerClick }: Lea
         html: `
           <div class="relative w-9 h-9 rounded-full flex items-center justify-center text-white shadow-lg border border-white dark:border-slate-800 ${iconColor} font-outfit text-xs font-semibold hover:scale-110 transition-transform">
             ${item.type === "parking" && item.price ? `₹${item.price}` : ""}
-            ${item.type === "ev" ? "⚡" : ""}
+            ${item.type === "ev" || item.hasEv ? "⚡" : ""}
             ${item.type === "cng" ? "⛽" : ""}
             ${item.type === "mechanic" ? "🔧" : ""}
             ${item.type === "user" ? "📍" : ""}

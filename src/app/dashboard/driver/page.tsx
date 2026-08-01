@@ -21,6 +21,7 @@ interface ParkingSpot {
   status: "available" | "occupied";
   price: number;
   info: string;
+  hasEv?: boolean;
 }
 
 export default function DriverPortal() {
@@ -51,6 +52,7 @@ export default function DriverPortal() {
             status: s.status.toLowerCase(),
             price: s.price,
             info: s.description || "No details provided.",
+            hasEv: s.hasEv
           }));
           setSpots(mappedSpots);
         }
@@ -351,10 +353,10 @@ export default function DriverPortal() {
                         <div className="pt-2">
                           <Button 
                             className="w-full bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center space-x-2"
-                            onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${b.spot.latitude},${b.spot.longitude}`, '_blank')}
+                            onClick={() => window.open(`https://maps.google.com/?q=${b.spot.latitude},${b.spot.longitude}`, '_blank')}
                           >
                             <MapPin className="w-4 h-4" />
-                            <span>Navigate to Spot</span>
+                            <span>Open in Maps</span>
                           </Button>
                         </div>
                       </div>
@@ -376,7 +378,16 @@ export default function DriverPortal() {
             center={mapCenter}
             zoom={14}
             markers={[
-              ...spots,
+              ...spots.map(s => ({
+                id: s.id,
+                title: s.title,
+                position: s.position,
+                type: s.type,
+                status: s.status,
+                price: s.price,
+                info: s.info,
+                hasEv: s.hasEv
+              })),
               ...(userLocation ? [{ id: "user-loc", position: userLocation, title: "Your Location", type: "user" as const }] : [])
             ]}
             onMarkerClick={handleSpotSelect}

@@ -18,7 +18,9 @@ import {
   CheckCircle,
   FileText,
   School,
-  Award
+  Award,
+  Car,
+  PlusCircle
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -53,28 +55,60 @@ export default function Home() {
             A unified companion transforming the parking experience, enabling peer-to-peer space monetization, and locating EV, CNG, and mechanics on-the-go.
           </p>
 
-          <div className="flex flex-col sm:flex-row justify-center items-center gap-4 pt-4">
-            <SignedIn>
-              <Link href="/dashboard">
-                <Button size="lg" className="w-full sm:w-auto font-semibold space-x-2 bg-accent hover:bg-accent-dark">
-                  <span>Go to Dashboard</span>
-                  <ArrowRight className="h-5 w-5" />
-                </Button>
-              </Link>
-            </SignedIn>
-            <SignedOut>
-              <SignInButton mode="modal">
-                <Button size="lg" className="w-full sm:w-auto font-semibold space-x-2 bg-accent hover:bg-accent-dark">
-                  <span>Get Started Now</span>
-                  <ArrowRight className="h-5 w-5" />
-                </Button>
-              </SignInButton>
-            </SignedOut>
-            <Link href="#features">
-              <Button variant="outline" size="lg" className="w-full sm:w-auto text-slate-100 hover:text-white border-slate-800 hover:bg-slate-900">
-                Explore Features
-              </Button>
-            </Link>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-12 max-w-4xl mx-auto w-full">
+            {/* Book a Slot Box */}
+            <div className="bg-slate-900/50 border-2 border-slate-800 hover:border-accent hover:bg-slate-900/80 transition-all rounded-2xl p-6 md:p-8 flex flex-col items-center text-center space-y-4 group shadow-xl">
+              <div className="w-16 h-16 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center text-accent group-hover:scale-110 transition-transform duration-300">
+                <Car className="h-8 w-8" />
+              </div>
+              <h3 className="text-2xl font-bold font-outfit text-white">Book a Slot</h3>
+              <p className="text-sm text-slate-400 max-w-sm mb-2">
+                Find available parking spots instantly using your location and navigate directly there.
+              </p>
+              <div className="pt-2 w-full mt-auto">
+                <SignedIn>
+                  <Link href="/dashboard/driver" className="block w-full">
+                    <Button size="lg" className="w-full font-bold bg-accent hover:bg-accent-dark text-white rounded-xl shadow-lg shadow-accent/20">
+                      Continue as Driver
+                    </Button>
+                  </Link>
+                </SignedIn>
+                <SignedOut>
+                  <SignInButton mode="modal" forceRedirectUrl="/dashboard/driver">
+                    <Button size="lg" className="w-full font-bold bg-accent hover:bg-accent-dark text-white rounded-xl shadow-lg shadow-accent/20">
+                      Sign in as Driver
+                    </Button>
+                  </SignInButton>
+                </SignedOut>
+              </div>
+            </div>
+
+            {/* Create a Slot Box */}
+            <div className="bg-slate-900/50 border-2 border-slate-800 hover:border-emerald-500 hover:bg-slate-900/80 transition-all rounded-2xl p-6 md:p-8 flex flex-col items-center text-center space-y-4 group shadow-xl">
+              <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 group-hover:scale-110 transition-transform duration-300">
+                <PlusCircle className="h-8 w-8" />
+              </div>
+              <h3 className="text-2xl font-bold font-outfit text-white">Create a Slot</h3>
+              <p className="text-sm text-slate-400 max-w-sm mb-2">
+                List your empty driveway or garage, set a price, and earn passive income easily.
+              </p>
+              <div className="pt-2 w-full mt-auto">
+                <SignedIn>
+                  <Link href="/dashboard/owner" className="block w-full">
+                    <Button size="lg" variant="outline" className="w-full font-bold border-2 border-emerald-500/50 text-emerald-400 hover:bg-emerald-500 hover:text-white rounded-xl shadow-lg shadow-emerald-500/10">
+                      Continue as Host
+                    </Button>
+                  </Link>
+                </SignedIn>
+                <SignedOut>
+                  <SignInButton mode="modal" forceRedirectUrl="/dashboard/owner">
+                    <Button size="lg" variant="outline" className="w-full font-bold border-2 border-emerald-500/50 text-emerald-400 hover:bg-emerald-500 hover:text-white rounded-xl shadow-lg shadow-emerald-500/10">
+                      Sign in as Host
+                    </Button>
+                  </SignInButton>
+                </SignedOut>
+              </div>
+            </div>
           </div>
         </div>
       </section>

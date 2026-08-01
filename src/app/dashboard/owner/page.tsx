@@ -62,8 +62,8 @@ export default function OwnerPortal() {
           address: newAddress,
           phone: newPhone,
           price: newRate,
-          latitude: 28.4 + Math.random() * 0.05, // Mock coords for now
-          longitude: 77.3 + Math.random() * 0.05
+          latitude: 28.88 + Math.random() * 0.03, // Mock coords for Rohtak
+          longitude: 76.58 + Math.random() * 0.03
         })
       });
 

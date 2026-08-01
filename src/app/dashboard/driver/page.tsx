@@ -24,7 +24,7 @@ interface ParkingSpot {
 
 export default function DriverPortal() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [mapCenter, setMapCenter] = useState<[number, number]>([28.4089, 77.3178]);
+  const [mapCenter, setMapCenter] = useState<[number, number]>([28.8955, 76.5892]);
   const [spots, setSpots] = useState<ParkingSpot[]>([]);
   const [myBookings, setMyBookings] = useState<any[]>([]);
   const [selectedSpot, setSelectedSpot] = useState<ParkingSpot | null>(null);

@@ -17,48 +17,48 @@ async function main() {
 
     const mockSpots = [
       {
-        id: "spot-1",
-        ownerId: owner.id,
-        title: "Sec-14 Main Market Plaza",
-        description: "Adjacent to Central Park. 24/7 CCTV surveillance, gate entry.",
-        price: 40,
-        latitude: 28.4089,
-        longitude: 77.3178,
-      },
-      {
-        id: "spot-2",
-        ownerId: owner.id,
-        title: "Metro Station Parking Slot 4B",
-        description: "Fast access to metro ticketing gates. Fully covered basement.",
+        title: "Model Town Driveway",
+        description: "Spacious residential driveway in Model Town. Very safe.",
         price: 30,
-        latitude: 28.4110,
-        longitude: 77.3210,
+        status: "AVAILABLE",
+        latitude: 28.8900,
+        longitude: 76.5900,
+        ownerId: owner.id
       },
       {
-        id: "spot-3",
-        ownerId: owner.id,
-        title: "P2P Residential Driveway",
-        description: "Monetized residential slot. Hosted by Manish. Safe, quiet street.",
+        title: "Medical More Parking Lot",
+        description: "Commercial lot near Medical More. 24/7 security.",
+        price: 45,
+        status: "AVAILABLE",
+        latitude: 28.8850,
+        longitude: 76.5850,
+        ownerId: owner.id
+      },
+      {
+        title: "D-Park Open Space",
+        description: "Open plot near D-Park. Good for large vehicles.",
         price: 25,
-        latitude: 28.4055,
-        longitude: 77.3140,
+        status: "AVAILABLE",
+        latitude: 28.8980,
+        longitude: 76.5800,
+        ownerId: owner.id
       },
       {
-        id: "spot-4",
-        ownerId: owner.id,
-        title: "Crown Plaza Mall Outdoor Lot",
-        description: "Open-air plaza park. Electric charging ports available on spot.",
-        price: 50,
-        latitude: 28.4125,
-        longitude: 77.3120,
-      }
+        title: "Sector 14 House Garage",
+        description: "Covered parking in Sector 14. Locked overnight.",
+        price: 40,
+        status: "OCCUPIED",
+        latitude: 28.8920,
+        longitude: 76.5950,
+        ownerId: owner.id
+      },
     ];
 
+    await prisma.parkingSpot.deleteMany({});
+
     for (const spot of mockSpots) {
-      await prisma.parkingSpot.upsert({
-        where: { id: spot.id },
-        update: spot,
-        create: spot,
+      await prisma.parkingSpot.create({
+        data: spot,
       });
     }
     console.log("Seeding complete!");

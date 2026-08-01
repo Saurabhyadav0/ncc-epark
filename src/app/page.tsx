@@ -91,7 +91,7 @@ export default function Home() {
               <UserCheck className="h-5 w-5 text-blue-500" />
               <div>
                 <p className="font-semibold text-slate-900 dark:text-slate-100">Saurabh Yadav</p>
-                <p className="text-[10px] text-slate-400">Enroll: hr2024sdia5640781</p>
+                <p className="text-[10px] text-slate-400">Enroll: HR2024SDIA5640781</p>
               </div>
             </div>
             <div className="flex items-center space-x-2.5">

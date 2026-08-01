@@ -35,7 +35,7 @@ export default function Navbar() {
           <span className="font-semibold text-slate-200 text-center sm:text-left">epark: Urban Mobility System</span>
         </div>
         <div className="flex flex-wrap justify-center sm:justify-end items-center gap-2 sm:gap-4">
-          <span className="text-slate-400">Developer: <strong className="text-white font-medium">Saurabh Yadav</strong> (hr2024sdia5640781)</span>
+          <span className="text-slate-400">Developer: <strong className="text-white font-medium">Saurabh Yadav</strong> (HR2024SDIA5640781)</span>
           <span className="bg-slate-800 text-slate-300 px-2 py-0.5 rounded text-[10px] font-mono">1HR BATTALION NCC</span>
         </div>
       </div>

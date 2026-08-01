@@ -53,6 +53,23 @@ export default function OwnerPortal() {
     if (!newTitle || !newRate || !newAddress || !newPhone) return;
     setIsSubmitting(true);
 
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          submitSpot(position.coords.latitude, position.coords.longitude);
+        },
+        (error) => {
+          console.error("Geolocation error:", error);
+          toast.error("Could not get location. Falling back to default Rohtak coordinates.");
+          submitSpot(28.8955 + (Math.random() - 0.5) * 0.02, 76.5892 + (Math.random() - 0.5) * 0.02);
+        }
+      );
+    } else {
+      submitSpot(28.8955 + (Math.random() - 0.5) * 0.02, 76.5892 + (Math.random() - 0.5) * 0.02);
+    }
+  };
+
+  const submitSpot = async (lat: number, lng: number) => {
     try {
       const res = await fetch("/api/spots", {
         method: "POST",
@@ -63,8 +80,8 @@ export default function OwnerPortal() {
           address: newAddress,
           phone: newPhone,
           price: newRate,
-          latitude: 28.88 + Math.random() * 0.03, // Mock coords for Rohtak
-          longitude: 76.58 + Math.random() * 0.03
+          latitude: lat,
+          longitude: lng
         })
       });
 

@@ -1,13 +1,50 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  clerkId   String   @unique
+  email     String?
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  spots     ParkingSpot[]
+  bookings  Booking[]
+}
+
+model ParkingSpot {
+  id          String   @id @default(cuid())
+  ownerId     String
+  owner       User     @relation(fields: [ownerId], references: [id])
+  title       String
+  description String?
+  price       Float
+  latitude    Float
+  longitude   Float
+  status      String   @default("AVAILABLE") // AVAILABLE, OCCUPIED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  bookings    Booking[]
+}
+
+model Booking {
+  id           String      @id @default(cuid())
+  spotId       String
+  spot         ParkingSpot @relation(fields: [spotId], references: [id])
+  driverId     String
+  driver       User        @relation(fields: [driverId], references: [id])
+  hours        Int
+  amount       Float
+  licensePlate String
+  status       String      @default("PENDING") // PENDING, ACCEPTED, PAID, REJECTED
+  paymentId    String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
 }

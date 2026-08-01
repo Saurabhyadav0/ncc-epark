@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Script from "next/script";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -22,56 +22,9 @@ interface ParkingSpot {
   info: string;
 }
 
-const mockSpots: ParkingSpot[] = [
-  {
-    id: "spot-1",
-    position: [28.4089, 77.3178], // Center
-    title: "Sec-14 Main Market Plaza",
-    type: "parking",
-    status: "available",
-    price: 40,
-    info: "Adjacent to Central Park. 24/7 CCTV surveillance, gate entry.",
-  },
-  {
-    id: "spot-2",
-    position: [28.4110, 77.3210],
-    title: "Metro Station Parking Slot 4B",
-    type: "parking",
-    status: "available",
-    price: 30,
-    info: "Fast access to metro ticketing gates. Fully covered basement.",
-  },
-  {
-    id: "spot-3",
-    position: [28.4055, 77.3140],
-    title: "P2P Residential Driveway",
-    type: "parking",
-    status: "available",
-    price: 25,
-    info: "Monetized residential slot. Hosted by Manish. Safe, quiet street.",
-  },
-  {
-    id: "spot-4",
-    position: [28.4125, 77.3120],
-    title: "Crown Plaza Mall Outdoor Lot",
-    type: "parking",
-    status: "occupied",
-    price: 50,
-    info: "Open-air plaza park. Electric charging ports available on spot.",
-  },
-  {
-    id: "spot-5",
-    position: [28.4020, 77.3230],
-    title: "Bata Chowk Commercial Lot",
-    type: "parking",
-    status: "available",
-    price: 45,
-    info: "Secured office block compound. Available for public parking after 6 PM.",
-  },
-];
-
 export default function DriverPortal() {
   const [searchQuery, setSearchQuery] = useState("Faridabad Sector 14");
+  const [spots, setSpots] = useState<ParkingSpot[]>([]);
   const [selectedSpot, setSelectedSpot] = useState<ParkingSpot | null>(null);
   const [hours, setHours] = useState(2);
   const [licensePlate, setLicensePlate] = useState("");
@@ -79,122 +32,84 @@ export default function DriverPortal() {
   const [successModalOpen, setSuccessModalOpen] = useState(false);
   const [bookingDetails, setBookingDetails] = useState<any>(null);
 
+  useEffect(() => {
+    // Fetch spots from database
+    const fetchSpots = async () => {
+      try {
+        const res = await fetch("/api/spots");
+        if (res.ok) {
+          const dbSpots = await res.json();
+          const mappedSpots = dbSpots.map((s: any) => ({
+            id: s.id,
+            position: [s.latitude, s.longitude],
+            title: s.title,
+            type: "parking",
+            status: s.status.toLowerCase(),
+            price: s.price,
+            info: s.description || "No details provided.",
+          }));
+          setSpots(mappedSpots);
+        }
+      } catch (err) {
+        console.error("Failed to fetch spots", err);
+      }
+    };
+    fetchSpots();
+  }, []);
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulate centring or finding spots
   };
 
   const handleSpotSelect = (marker: any) => {
-    // Cast to ParkingSpot if type is parking
     if (marker.type === "parking") {
       setSelectedSpot(marker as ParkingSpot);
     }
   };
 
-  const executeRazorpayCheckout = async (orderId: string, amount: number) => {
-    const keyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_mockkeyid12345";
-
-    const options = {
-      key: keyId,
-      amount: amount * 100, // In paise
-      currency: "INR",
-      name: "epark Mobility",
-      description: `Parking booking for ${selectedSpot?.title}`,
-      order_id: orderId,
-      handler: async function (response: any) {
-        setIsLoading(true);
-        try {
-          const res = await fetch("/api/payment/verify", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-            }),
-          });
-          const result = await res.json();
-          if (result.success) {
-            setBookingDetails({
-              spotTitle: selectedSpot?.title,
-              hours,
-              amount,
-              licensePlate: licensePlate || "MH-12-AB-3456",
-              paymentId: response.razorpay_payment_id,
-            });
-            setSuccessModalOpen(true);
-            setSelectedSpot(null);
-            setLicensePlate("");
-          } else {
-            alert("Payment verification failed! Please try again.");
-          }
-        } catch (err) {
-          console.error(err);
-          alert("Error verifying payment.");
-        } finally {
-          setIsLoading(false);
-        }
-      },
-      prefill: {
-        name: "Test Driver",
-        email: "driver@epark.in",
-        contact: "9999999999",
-      },
-      theme: {
-        color: "#10b981", // Accent color
-      },
-    };
-
-    const rzp = new (window as any).Razorpay(options);
-    rzp.open();
-  };
-
-  const handlePay = async (isMock: boolean = false) => {
+  const handleRequestBooking = async () => {
     if (!selectedSpot) return;
+    
+    if (!licensePlate) {
+      alert("Please enter a license plate number.");
+      return;
+    }
+
     setIsLoading(true);
 
     const totalAmount = selectedSpot.price * hours;
 
-    if (isMock) {
-      // Simulate API call and payment delay
-      setTimeout(() => {
+    try {
+      const response = await fetch("/api/booking/request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          spotId: selectedSpot.id,
+          hours,
+          amount: totalAmount,
+          licensePlate
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
         setBookingDetails({
           spotTitle: selectedSpot.title,
           hours,
           amount: totalAmount,
-          licensePlate: licensePlate || "MH-12-AB-3456",
-          paymentId: "pay_mock_" + Math.random().toString(36).substring(7),
+          licensePlate: licensePlate,
+          status: "PENDING",
         });
-        setIsLoading(false);
         setSuccessModalOpen(true);
         setSelectedSpot(null);
         setLicensePlate("");
-      }, 1500);
-      return;
-    }
-
-    try {
-      const response = await fetch("/api/booking", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          amount: totalAmount,
-          spotId: selectedSpot.id,
-        }),
-      });
-
-      const order = await response.json();
-
-      if (order.id) {
-        await executeRazorpayCheckout(order.id, totalAmount);
       } else {
-        alert("Failed to create order, using mock checkout instead.");
-        handlePay(true); // Fallback to mock
+        alert("Failed to request booking: " + result.error);
       }
     } catch (err) {
       console.error(err);
-      alert("Error initiating Razorpay checkout, falling back to mock flow.");
-      handlePay(true);
+      alert("Error requesting booking.");
     } finally {
       setIsLoading(false);
     }
@@ -204,9 +119,6 @@ export default function DriverPortal() {
     <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-200">
       <Navbar />
       
-      {/* Razorpay Script */}
-      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
-
       <main className="flex-1 flex flex-col md:flex-row">
         
         {/* Left Side: Booking & Search Controls */}
@@ -219,7 +131,6 @@ export default function DriverPortal() {
             </p>
           </div>
 
-          {/* Search form */}
           <form onSubmit={handleSearch} className="flex gap-2">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-3.5 h-4 w-4 text-slate-400" />
@@ -235,7 +146,6 @@ export default function DriverPortal() {
             </Button>
           </form>
 
-          {/* Spot Config Details Panel */}
           {selectedSpot ? (
             <Card className="border border-slate-200 dark:border-slate-800 animate-in fade-in-40 slide-in-from-bottom-2">
               <CardHeader className="pb-3 flex flex-row justify-between items-start space-y-0">
@@ -260,15 +170,14 @@ export default function DriverPortal() {
                   <span className="font-bold text-accent dark:text-accent-dark">₹{selectedSpot.price}/hr</span>
                 </div>
 
-                {/* Booking duration & plate input */}
                 {selectedSpot.status === "available" ? (
                   <div className="space-y-4 pt-1">
                     <div className="space-y-1.5">
                       <label className="text-xs font-semibold text-slate-500">License Plate Number</label>
                       <Input
-                        value={licensePlate}
-                        onChange={(e) => setLicensePlate(e.target.value)}
-                        placeholder="e.g. HR-26-XX-1234"
+                         value={licensePlate}
+                         onChange={(e) => setLicensePlate(e.target.value)}
+                         placeholder="e.g. HR-26-XX-1234"
                       />
                     </div>
 
@@ -287,7 +196,6 @@ export default function DriverPortal() {
                       />
                     </div>
 
-                    {/* Total billing summary */}
                     <div className="bg-slate-50 dark:bg-slate-900/60 p-3 rounded-lg flex justify-between items-center border border-slate-100 dark:border-slate-800">
                       <div>
                         <div className="text-[10px] text-slate-400 uppercase font-bold">Total Amount</div>
@@ -298,23 +206,14 @@ export default function DriverPortal() {
                       </div>
                     </div>
 
-                    {/* Pay button with mock option */}
                     <div className="flex flex-col gap-2 pt-2">
                       <Button
-                        onClick={() => handlePay(false)}
+                        onClick={handleRequestBooking}
                         disabled={isLoading}
                         className="w-full bg-accent hover:bg-accent-dark text-white space-x-2 font-semibold"
                       >
-                        <CreditCard className="h-4 w-4" />
-                        <span>{isLoading ? "Processing..." : "Pay via Razorpay"}</span>
-                      </Button>
-                      <Button
-                        variant="secondary"
-                        onClick={() => handlePay(true)}
-                        disabled={isLoading}
-                        className="w-full text-xs"
-                      >
-                        ⚡ Test Booking (Bypass payment key)
+                        <Car className="h-4 w-4" />
+                        <span>{isLoading ? "Requesting..." : "Request Booking"}</span>
                       </Button>
                     </div>
                   </div>
@@ -330,40 +229,31 @@ export default function DriverPortal() {
               <Car className="h-10 w-10 text-slate-300 dark:text-slate-700 animate-pulse" />
               <h4 className="font-outfit font-semibold text-slate-700 dark:text-slate-300 text-sm">No Spot Selected</h4>
               <p className="text-xs text-slate-400 max-w-[200px]">
-                Click on any marker on the map to view coordinates, check pricing, and lock bookings.
+                Click on any marker on the map to view coordinates, check pricing, and request bookings.
               </p>
             </div>
           )}
-
-          {/* Secure transaction notice */}
-          <div className="text-[10px] text-slate-400 flex items-center space-x-2 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-lg border border-slate-200/40 dark:border-slate-800/40 mt-auto">
-            <ShieldCheck className="h-5 w-5 text-emerald-500 shrink-0" />
-            <span>Payments verified securely by Razorpay. Zero liability encryption activated.</span>
-          </div>
-
         </div>
 
         {/* Right Side: Maps Frame */}
         <div className="flex-1 min-h-[450px] md:min-h-0 relative">
           <Map
-            center={[28.4089, 77.3178]} // Faridabad center
+            center={[28.4089, 77.3178]}
             zoom={14}
-            markers={mockSpots}
+            markers={spots}
             onMarkerClick={handleSpotSelect}
           />
         </div>
-
       </main>
 
-      {/* Success Dialog */}
       <Dialog open={successModalOpen} onOpenChange={setSuccessModalOpen}>
         <DialogHeader>
-          <div className="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-3">
-            <ShieldCheck className="h-6 w-6 animate-bounce" />
+          <div className="w-12 h-12 bg-amber-500/10 border border-amber-500/20 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-3">
+            <Clock className="h-6 w-6 animate-pulse" />
           </div>
-          <DialogTitle className="text-center text-xl">Booking Confirmed!</DialogTitle>
+          <DialogTitle className="text-center text-xl">Request Sent to Host!</DialogTitle>
           <DialogDescription className="text-center">
-            Your parking space has been successfully reserved.
+            Your booking request is pending. The host will review and accept it shortly.
           </DialogDescription>
         </DialogHeader>
 
@@ -381,20 +271,20 @@ export default function DriverPortal() {
               <span className="text-slate-400">Duration:</span>
               <span className="font-semibold text-slate-900 dark:text-slate-100">{bookingDetails.hours} Hours</span>
             </div>
-            <div className="flex justify-between border-t border-slate-100 dark:border-slate-800 pt-2 font-medium">
-              <span className="text-slate-400">Total Paid:</span>
-              <span className="font-extrabold text-accent dark:text-accent-dark text-base">₹{bookingDetails.amount}</span>
+            <div className="flex justify-between">
+              <span className="text-slate-400">Status:</span>
+              <Badge variant="outline" className="text-amber-500 border-amber-500">PENDING</Badge>
             </div>
-            <div className="flex justify-between text-[10px] text-slate-400 font-mono pt-1">
-              <span>Receipt Ref:</span>
-              <span>{bookingDetails.paymentId}</span>
+            <div className="flex justify-between border-t border-slate-100 dark:border-slate-800 pt-2 font-medium">
+              <span className="text-slate-400">Amount to Pay (Once Accepted):</span>
+              <span className="font-extrabold text-accent dark:text-accent-dark text-base">₹{bookingDetails.amount}</span>
             </div>
           </div>
         )}
 
         <DialogFooter className="sm:justify-center">
           <Button onClick={() => setSuccessModalOpen(false)} className="w-full bg-accent hover:bg-accent-dark">
-            Dismiss Receipt
+            Dismiss
           </Button>
         </DialogFooter>
       </Dialog>

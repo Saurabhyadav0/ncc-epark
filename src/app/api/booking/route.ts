@@ -1,5 +1,31 @@
 import { NextResponse } from "next/server";
 import Razorpay from "razorpay";
+import { prisma } from "@/lib/prisma";
+import { auth } from "@clerk/nextjs/server";
+
+export async function GET(request: Request) {
+  try {
+    const { userId } = auth();
+    if (!userId) return new NextResponse("Unauthorized", { status: 401 });
+
+    const user = await prisma.user.findUnique({
+      where: { clerkId: userId }
+    });
+
+    if (!user) return NextResponse.json([]);
+
+    const bookings = await prisma.booking.findMany({
+      where: { driverId: user.id },
+      include: { spot: true },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    return NextResponse.json(bookings);
+  } catch (error) {
+    console.error("Fetch bookings error:", error);
+    return new NextResponse("Internal Error", { status: 500 });
+  }
+}
 
 export async function POST(request: Request) {
   try {

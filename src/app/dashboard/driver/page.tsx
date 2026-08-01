@@ -302,7 +302,7 @@ export default function DriverPortal() {
             </div>
             <div className="flex justify-between">
               <span className="text-slate-400">Status:</span>
-              <Badge variant="outline" className="text-amber-500 border-amber-500">PENDING</Badge>
+              <Badge variant="warning" className="text-amber-500 border-amber-500">PENDING</Badge>
             </div>
             <div className="flex justify-between border-t border-slate-100 dark:border-slate-800 pt-2 font-medium">
               <span className="text-slate-400">Amount to Pay (Once Accepted):</span>

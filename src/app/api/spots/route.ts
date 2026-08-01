@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { auth } from "@clerk/nextjs/server";
 
 export async function GET() {
   try {
@@ -10,5 +11,46 @@ export async function GET() {
   } catch (error) {
     console.error("Fetch spots error:", error);
     return new NextResponse("Internal Error", { status: 500 });
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    const { userId } = auth();
+    if (!userId) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+
+    const data = await request.json();
+    const { title, description, address, phone, price, latitude, longitude } = data;
+
+    if (!title || !price || !latitude || !longitude || !address || !phone) {
+      return new NextResponse("Missing required fields", { status: 400 });
+    }
+
+    // Ensure owner exists
+    const owner = await prisma.user.upsert({
+      where: { clerkId: userId },
+      update: {},
+      create: { clerkId: userId, name: "Owner" }
+    });
+
+    const spot = await prisma.parkingSpot.create({
+      data: {
+        title,
+        description,
+        address,
+        phone,
+        price: Number(price),
+        latitude: Number(latitude),
+        longitude: Number(longitude),
+        ownerId: owner.id,
+      }
+    });
+
+    return NextResponse.json({ success: true, spot });
+  } catch (error: any) {
+    console.error("Create spot error:", error);
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

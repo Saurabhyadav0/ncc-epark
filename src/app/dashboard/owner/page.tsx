@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/Button";
@@ -9,88 +9,105 @@ import { Input } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
 import { 
   PlusCircle, 
-  MapPin, 
   DollarSign, 
   Clock, 
   TrendingUp, 
   Sparkles,
   CheckCircle,
-  Building,
-  Home
+  Inbox
 } from "lucide-react";
 
-interface Listing {
-  id: string;
-  title: string;
-  type: string;
-  rate: number;
-  earnings: number;
-  bookings: number;
-  status: "Active" | "Inactive";
-}
-
-const initialListings: Listing[] = [
-  {
-    id: "list-1",
-    title: "Manish's Sec-14 Residential Driveway",
-    type: "Driveway",
-    rate: 25,
-    earnings: 3250,
-    bookings: 14,
-    status: "Active",
-  },
-  {
-    id: "list-2",
-    title: "Sector 15 Covered Garage Space",
-    type: "Garage",
-    rate: 35,
-    earnings: 1600,
-    bookings: 10,
-    status: "Active",
-  }
-];
-
 export default function OwnerPortal() {
-  const [listings, setListings] = useState<Listing[]>(initialListings);
+  const [spots, setSpots] = useState<any[]>([]);
+  const [bookings, setBookings] = useState<any[]>([]);
+  
   const [newTitle, setNewTitle] = useState("");
   const [newType, setNewType] = useState("Driveway");
   const [newRate, setNewRate] = useState("");
   const [newAddress, setNewAddress] = useState("");
+  const [newPhone, setNewPhone] = useState("");
+  
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
 
-  const handleAddSpace = (e: React.FormEvent) => {
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const res = await fetch("/api/owner");
+      if (res.ok) {
+        const data = await res.json();
+        setSpots(data.spots);
+        setBookings(data.bookings);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleAddSpace = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newTitle || !newRate) return;
+    if (!newTitle || !newRate || !newAddress || !newPhone) return;
+    setIsSubmitting(true);
 
-    const newListing: Listing = {
-      id: "list-" + (listings.length + 1),
-      title: newTitle,
-      type: newType,
-      rate: Number(newRate),
-      earnings: 0,
-      bookings: 0,
-      status: "Active"
-    };
+    try {
+      const res = await fetch("/api/spots", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: newTitle,
+          description: newType,
+          address: newAddress,
+          phone: newPhone,
+          price: newRate,
+          latitude: 28.4 + Math.random() * 0.05, // Mock coords for now
+          longitude: 77.3 + Math.random() * 0.05
+        })
+      });
 
-    setListings([newListing, ...listings]);
-    setNewTitle("");
-    setNewRate("");
-    setNewAddress("");
-    setShowSuccessAlert(true);
-    setTimeout(() => setShowSuccessAlert(false), 4000);
+      if (res.ok) {
+        setNewTitle("");
+        setNewRate("");
+        setNewAddress("");
+        setNewPhone("");
+        setShowSuccessAlert(true);
+        setTimeout(() => setShowSuccessAlert(false), 4000);
+        fetchData();
+      } else {
+        alert("Failed to create spot");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error submitting spot");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const toggleStatus = (id: string) => {
-    setListings(
-      listings.map((l) =>
-        l.id === id ? { ...l, status: l.status === "Active" ? "Inactive" : "Active" } : l
-      )
-    );
+  const handleBookingAction = async (bookingId: string, status: "ACCEPTED" | "REJECTED") => {
+    try {
+      const res = await fetch("/api/booking/accept", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookingId, status })
+      });
+      if (res.ok) {
+        fetchData();
+      } else {
+        alert("Failed to update booking status");
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  // Calculate stats
-  const totalEarnings = listings.reduce((sum, item) => sum + item.earnings, 0);
-  const totalBookings = listings.reduce((sum, item) => sum + item.bookings, 0);
+  const pendingBookings = bookings.filter(b => b.status === "PENDING");
+  const acceptedBookings = bookings.filter(b => b.status === "ACCEPTED" || b.status === "PAID");
+
+  const totalEarnings = acceptedBookings.reduce((sum, item) => sum + item.amount, 0);
+  const totalBookingsCount = acceptedBookings.length;
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-200">
@@ -106,7 +123,6 @@ export default function OwnerPortal() {
           </p>
         </div>
 
-        {/* Success Alert */}
         {showSuccessAlert && (
           <div className="flex items-center space-x-3 p-4 bg-emerald-100/10 border border-emerald-500/30 text-emerald-500 text-sm rounded-xl font-medium animate-in fade-in">
             <CheckCircle className="h-5 w-5 shrink-0" />
@@ -123,80 +139,114 @@ export default function OwnerPortal() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-extrabold font-outfit text-slate-950 dark:text-white">₹{totalEarnings}</div>
-              <p className="text-xs text-slate-400 mt-1">Direct payout transfer on 1st of every month.</p>
+              <p className="text-xs text-slate-400 mt-1">From accepted & paid bookings.</p>
             </CardContent>
           </Card>
 
           <Card className="border border-slate-200 dark:border-slate-800">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <span className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Cars Hosted</span>
+              <span className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Accepted Bookings</span>
               <Clock className="h-5 w-5 text-blue-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-extrabold font-outfit text-slate-950 dark:text-white">{totalBookings}</div>
-              <p className="text-xs text-slate-400 mt-1">Representing {totalBookings * 2} hours total occupied time.</p>
+              <div className="text-3xl font-extrabold font-outfit text-slate-950 dark:text-white">{totalBookingsCount}</div>
+              <p className="text-xs text-slate-400 mt-1">Drivers successfully hosted.</p>
             </CardContent>
           </Card>
 
           <Card className="border border-slate-200 dark:border-slate-800">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <span className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Passive Growth</span>
+              <span className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Active Listings</span>
               <TrendingUp className="h-5 w-5 text-indigo-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-extrabold font-outfit text-slate-950 dark:text-white">+28%</div>
-              <p className="text-xs text-slate-400 mt-1">Increase in parking demand in your area this week.</p>
+              <div className="text-3xl font-extrabold font-outfit text-slate-950 dark:text-white">{spots.length}</div>
+              <p className="text-xs text-slate-400 mt-1">Total parking spots you have created.</p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Dynamic Dual Grid Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
-          {/* Left Columns: Listing Management & Analytics */}
           <div className="lg:col-span-2 space-y-8">
+            
+            {/* Incoming Requests Panel */}
+            <Card className="border-2 border-amber-500/30 shadow-lg shadow-amber-500/10">
+              <CardHeader>
+                <CardTitle className="text-xl flex items-center space-x-2 text-amber-500">
+                  <Inbox className="h-5 w-5" />
+                  <span>Incoming Booking Requests</span>
+                </CardTitle>
+                <CardDescription>Drivers waiting for your approval to park</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {pendingBookings.length === 0 ? (
+                  <div className="text-center py-6 text-slate-500 text-sm">
+                    No pending requests at the moment.
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {pendingBookings.map(b => (
+                      <div key={b.id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 bg-slate-50 dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 gap-4">
+                        <div className="space-y-1">
+                          <h4 className="font-bold text-slate-900 dark:text-white">{b.spot.title}</h4>
+                          <div className="text-xs text-slate-500 space-x-3">
+                            <span>License: <strong className="text-slate-700 dark:text-slate-300">{b.licensePlate}</strong></span>
+                            <span>Duration: <strong className="text-slate-700 dark:text-slate-300">{b.hours} hrs</strong></span>
+                          </div>
+                          <div className="text-xs font-bold text-accent">Payout: ₹{b.amount}</div>
+                        </div>
+                        <div className="flex space-x-2 w-full sm:w-auto">
+                          <Button 
+                            variant="outline" 
+                            className="flex-1 text-rose-500 hover:bg-rose-50"
+                            onClick={() => handleBookingAction(b.id, "REJECTED")}
+                          >
+                            Reject
+                          </Button>
+                          <Button 
+                            className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white"
+                            onClick={() => handleBookingAction(b.id, "ACCEPTED")}
+                          >
+                            Accept
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
             <Card className="border border-slate-200 dark:border-slate-800">
               <CardHeader>
                 <CardTitle className="text-xl">Your Registered Parking Spots</CardTitle>
-                <CardDescription>Manage active states and hourly billing rates</CardDescription>
               </CardHeader>
               <CardContent className="overflow-x-auto">
                 <table className="w-full text-sm text-left border-collapse">
                   <thead>
                     <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-400 text-xs uppercase font-bold">
                       <th className="py-3 px-2">Spot Details</th>
-                      <th className="py-3 px-2">Type</th>
+                      <th className="py-3 px-2">Address</th>
                       <th className="py-3 px-2">Rate</th>
-                      <th className="py-3 px-2">Total Income</th>
                       <th className="py-3 px-2 text-center">Status</th>
-                      <th className="py-3 px-2 text-right">Action</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {listings.map((l) => (
+                    {spots.length === 0 && (
+                      <tr>
+                        <td colSpan={4} className="text-center py-4 text-slate-500">No spots listed yet.</td>
+                      </tr>
+                    )}
+                    {spots.map((l) => (
                       <tr key={l.id} className="border-b border-slate-100 dark:border-slate-900 last:border-0 text-slate-700 dark:text-slate-300">
                         <td className="py-4 px-2 font-medium text-slate-950 dark:text-white">{l.title}</td>
-                        <td className="py-4 px-2">
-                          <span className="text-xs font-semibold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-                            {l.type}
-                          </span>
-                        </td>
-                        <td className="py-4 px-2 font-semibold">₹{l.rate}/hr</td>
-                        <td className="py-4 px-2 font-bold text-accent dark:text-accent-dark">₹{l.earnings}</td>
+                        <td className="py-4 px-2 text-xs truncate max-w-[200px]">{l.address}</td>
+                        <td className="py-4 px-2 font-semibold">₹{l.price}/hr</td>
                         <td className="py-4 px-2 text-center">
-                          <Badge variant={l.status === "Active" ? "success" : "secondary"}>
+                          <Badge variant={l.status === "AVAILABLE" ? "success" : "secondary"}>
                             {l.status}
                           </Badge>
-                        </td>
-                        <td className="py-4 px-2 text-right">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => toggleStatus(l.id)}
-                            className="text-xs text-blue-500 hover:text-blue-600"
-                          >
-                            Toggle State
-                          </Button>
                         </td>
                       </tr>
                     ))}
@@ -205,38 +255,8 @@ export default function OwnerPortal() {
               </CardContent>
             </Card>
 
-            {/* Income Analytics bar graph using pure CSS Flexboxes */}
-            <Card className="border border-slate-200 dark:border-slate-800">
-              <CardHeader>
-                <CardTitle className="text-xl">Weekly Earnings Analytics</CardTitle>
-                <CardDescription>Visualizing host revenue streams by weekday</CardDescription>
-              </CardHeader>
-              <CardContent className="h-64 flex flex-col justify-end">
-                <div className="flex items-end justify-between h-48 px-4 border-b border-slate-200 dark:border-slate-800 pb-2">
-                  {[
-                    { day: "Mon", amt: 350, h: "h-[30%]" },
-                    { day: "Tue", amt: 490, h: "h-[45%]" },
-                    { day: "Wed", amt: 650, h: "h-[60%]" },
-                    { day: "Thu", amt: 200, h: "h-[18%]" },
-                    { day: "Fri", amt: 890, h: "h-[85%]" },
-                    { day: "Sat", amt: 1100, h: "h-[100%]" },
-                    { day: "Sun", amt: 980, h: "h-[90%]" },
-                  ].map((bar, i) => (
-                    <div key={i} className="flex flex-col items-center flex-1 space-y-2 group">
-                      <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-slate-900 text-white text-[10px] py-1 px-1.5 rounded -mt-8 absolute font-bold z-10">
-                        ₹{bar.amt}
-                      </div>
-                      <div className={`w-8 ${bar.h} bg-accent dark:bg-accent-dark rounded-t-md hover:opacity-85 transition-opacity`}></div>
-                      <span className="text-xs text-slate-400">{bar.day}</span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
           </div>
 
-          {/* Right Column: Add New Space Register Form */}
           <div className="space-y-6">
             <Card className="border border-slate-200 dark:border-slate-800">
               <CardHeader>
@@ -272,30 +292,28 @@ export default function OwnerPortal() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-slate-500">Spot Type</label>
-                    <select
-                      value={newType}
-                      onChange={(e) => setNewType(e.target.value)}
-                      className="flex h-11 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-100"
-                    >
-                      <option value="Driveway">🏡 Driveway</option>
-                      <option value="Garage">🚗 Garage Space</option>
-                      <option value="Open Plot">🌳 Open Plot</option>
-                      <option value="Commercial Lot">🏢 Commercial Lot</option>
-                    </select>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-slate-500">Full Coordinates / Address</label>
+                    <label className="text-xs font-semibold text-slate-500">Exact Address (Shared securely)</label>
                     <Input
                       value={newAddress}
                       onChange={(e) => setNewAddress(e.target.value)}
                       placeholder="e.g. House 412, Sector 14, Faridabad"
+                      required
                     />
                   </div>
 
-                  <Button type="submit" variant="accent" className="w-full bg-accent hover:bg-accent-dark font-semibold mt-2">
-                    Publish Spot Live
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-slate-500">Host Phone Number</label>
+                    <Input
+                      value={newPhone}
+                      onChange={(e) => setNewPhone(e.target.value)}
+                      placeholder="e.g. +91 9999999999"
+                      required
+                    />
+                    <p className="text-[10px] text-slate-400">Only shared with drivers *after* you accept their booking.</p>
+                  </div>
+
+                  <Button type="submit" variant="accent" disabled={isSubmitting} className="w-full bg-accent hover:bg-accent-dark font-semibold mt-2">
+                    {isSubmitting ? "Publishing..." : "Publish Spot Live"}
                   </Button>
                 </form>
               </CardContent>

@@ -26,6 +26,7 @@ export default function DriverPortal() {
   const [searchQuery, setSearchQuery] = useState("");
   const [mapCenter, setMapCenter] = useState<[number, number]>([28.4089, 77.3178]);
   const [spots, setSpots] = useState<ParkingSpot[]>([]);
+  const [myBookings, setMyBookings] = useState<any[]>([]);
   const [selectedSpot, setSelectedSpot] = useState<ParkingSpot | null>(null);
   const [hours, setHours] = useState(2);
   const [licensePlate, setLicensePlate] = useState("");
@@ -56,6 +57,19 @@ export default function DriverPortal() {
       }
     };
     fetchSpots();
+
+    const fetchMyBookings = async () => {
+      try {
+        const res = await fetch("/api/booking");
+        if (res.ok) {
+          const data = await res.json();
+          setMyBookings(data);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchMyBookings();
 
     // Automatically get user location on load
     handleGetLocation();
@@ -122,6 +136,12 @@ export default function DriverPortal() {
         setSuccessModalOpen(true);
         setSelectedSpot(null);
         setLicensePlate("");
+        
+        // Refresh bookings
+        const res = await fetch("/api/booking");
+        if (res.ok) {
+          setMyBookings(await res.json());
+        }
       } else {
         alert("Failed to request booking: " + result.error);
       }
@@ -260,6 +280,46 @@ export default function DriverPortal() {
               <p className="text-xs text-slate-400 max-w-[200px]">
                 Click on any marker on the map to view coordinates, check pricing, and request bookings.
               </p>
+            </div>
+          {myBookings.length > 0 && (
+            <div className="mt-8 space-y-4">
+              <h3 className="font-bold text-slate-900 dark:text-white">Your Bookings</h3>
+              {myBookings.map((b) => (
+                <Card key={b.id} className="border border-slate-200 dark:border-slate-800">
+                  <CardContent className="p-4 space-y-3">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h4 className="font-bold text-slate-900 dark:text-white">{b.spot.title}</h4>
+                        <p className="text-xs text-slate-500">License: {b.licensePlate}</p>
+                      </div>
+                      <Badge variant={b.status === "ACCEPTED" ? "success" : b.status === "PENDING" ? "warning" : "secondary"}>
+                        {b.status}
+                      </Badge>
+                    </div>
+                    
+                    {b.status === "ACCEPTED" && (
+                      <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 p-3 rounded-lg space-y-2 mt-2">
+                        <div className="text-xs text-emerald-800 dark:text-emerald-300 font-bold mb-1 flex items-center space-x-1">
+                          <ShieldCheck className="h-4 w-4" />
+                          <span>Host Contact Info Unlocked</span>
+                        </div>
+                        <div className="flex flex-col space-y-1">
+                          <span className="text-xs text-slate-600 dark:text-slate-400">Address:</span>
+                          <span className="text-sm font-semibold text-slate-900 dark:text-white">{b.spot.address || "No address provided"}</span>
+                        </div>
+                        <div className="flex flex-col space-y-1">
+                          <span className="text-xs text-slate-600 dark:text-slate-400">Phone Number:</span>
+                          <span className="text-sm font-semibold text-slate-900 dark:text-white">{b.spot.phone || "No phone provided"}</span>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {b.status === "PENDING" && (
+                      <p className="text-xs text-amber-600">Waiting for host to accept...</p>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           )}
         </div>

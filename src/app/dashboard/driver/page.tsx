@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
 import { Dialog, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/Dialog";
 import { Search, MapPin, Clock, CreditCard, ShieldCheck, Car } from "lucide-react";
+import toast from "react-hot-toast";
 
 interface ParkingSpot {
   id: string;
@@ -103,7 +104,7 @@ export default function DriverPortal() {
     if (!selectedSpot) return;
     
     if (!licensePlate) {
-      alert("Please enter a license plate number.");
+      toast.error("Please enter a license plate number.");
       return;
     }
 
@@ -143,11 +144,11 @@ export default function DriverPortal() {
           setMyBookings(await res.json());
         }
       } else {
-        alert("Failed to request booking: " + result.error);
+        toast.error("Failed to request booking: " + result.error);
       }
     } catch (err) {
       console.error(err);
-      alert("Error requesting booking.");
+      toast.error("Error requesting booking.");
     } finally {
       setIsLoading(false);
     }

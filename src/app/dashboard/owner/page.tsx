@@ -16,6 +16,7 @@ import {
   CheckCircle,
   Inbox
 } from "lucide-react";
+import toast from "react-hot-toast";
 
 export default function OwnerPortal() {
   const [spots, setSpots] = useState<any[]>([]);
@@ -72,15 +73,14 @@ export default function OwnerPortal() {
         setNewRate("");
         setNewAddress("");
         setNewPhone("");
-        setShowSuccessAlert(true);
-        setTimeout(() => setShowSuccessAlert(false), 4000);
+        toast.success("Spot created successfully!");
         fetchData();
       } else {
-        alert("Failed to create spot");
+        toast.error("Failed to create spot");
       }
     } catch (err) {
       console.error(err);
-      alert("Error submitting spot");
+      toast.error("Error submitting spot");
     } finally {
       setIsSubmitting(false);
     }
@@ -94,12 +94,14 @@ export default function OwnerPortal() {
         body: JSON.stringify({ bookingId, status })
       });
       if (res.ok) {
+        toast.success(`Booking ${status.toLowerCase()}!`);
         fetchData();
       } else {
-        alert("Failed to update booking status");
+        toast.error("Failed to update booking status");
       }
     } catch (err) {
       console.error(err);
+      toast.error("Error updating booking");
     }
   };
 

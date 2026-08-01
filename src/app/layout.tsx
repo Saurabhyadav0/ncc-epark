@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Outfit, Inter } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
+import { Toaster } from "react-hot-toast";
 import React from "react";
 
 const outfit = Outfit({ 
@@ -38,6 +39,7 @@ export default function RootLayout({
           />
         </head>
         <body className={`${inter.variable} ${outfit.variable} font-sans antialiased`}>
+          <Toaster position="bottom-right" />
           {children}
         </body>
       </html>

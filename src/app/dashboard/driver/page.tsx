@@ -39,7 +39,7 @@ export default function DriverPortal() {
     // Fetch spots from database
     const fetchSpots = async () => {
       try {
-        const res = await fetch("/api/spots");
+        const res = await fetch("/api/spots", { cache: "no-store" });
         if (res.ok) {
           const dbSpots = await res.json();
           const mappedSpots = dbSpots.map((s: any) => ({

@@ -76,7 +76,8 @@ export default function OwnerPortal() {
         toast.success("Spot created successfully!");
         fetchData();
       } else {
-        toast.error("Failed to create spot");
+        const errorData = await res.json().catch(() => ({}));
+        toast.error(`Failed to create spot: ${errorData.error || res.statusText}`);
       }
     } catch (err) {
       console.error(err);

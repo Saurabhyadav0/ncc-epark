@@ -29,13 +29,13 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-40 w-full transition-colors duration-200">
       {/* Student Submission Banner */}
-      <div className="w-full bg-slate-900 text-slate-100 text-xs py-2 px-4 flex flex-wrap justify-between items-center border-b border-slate-800 font-sans tracking-wide">
+      <div className="w-full bg-slate-900 text-slate-100 text-xs py-2 px-4 flex flex-col sm:flex-row justify-between items-center gap-2 border-b border-slate-800 font-sans tracking-wide">
         <div className="flex items-center space-x-2">
-          <span className="bg-blue-600 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">PROJECT</span>
-          <span className="font-semibold text-slate-200">epark: Urban Mobility System</span>
+          <span className="bg-blue-600 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider shrink-0">PROJECT</span>
+          <span className="font-semibold text-slate-200 text-center sm:text-left">epark: Urban Mobility System</span>
         </div>
-        <div className="flex items-center space-x-4">
-          <span className="hidden md:inline text-slate-400">Developer: <strong className="text-white font-medium">Manish</strong> (HR23SDA011018)</span>
+        <div className="flex flex-wrap justify-center sm:justify-end items-center gap-2 sm:gap-4">
+          <span className="text-slate-400">Developer: <strong className="text-white font-medium">Saurabh Yadav</strong> (hr2024sdia5640781)</span>
           <span className="bg-slate-800 text-slate-300 px-2 py-0.5 rounded text-[10px] font-mono">1HR BATTALION NCC</span>
         </div>
       </div>
@@ -110,7 +110,7 @@ export default function Navbar() {
       {mobileMenuOpen && (
         <div className="md:hidden w-full bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 p-4 space-y-3 flex flex-col text-sm font-medium animate-in slide-in-from-top-4">
           <span className="md:hidden text-[10px] text-slate-400 font-mono tracking-wider border-b border-slate-100 dark:border-slate-800 pb-1">
-            SUBMISSION BY MANISH • 1HR BATTALION NCC
+            SUBMISSION BY SAURABH YADAV • 1HR BATTALION NCC
           </span>
           <Link
             href="/"

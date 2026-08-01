@@ -112,8 +112,11 @@ export default function DriverPortal() {
     }
 
     setIsLoading(true);
-
     const totalAmount = selectedSpot.price * hours;
+
+    // Simulate Razorpay payment (bypass for testing)
+    await new Promise(resolve => setTimeout(resolve, 800)); // simulate network delay
+    toast.success("Razorpay Payment Successful (Test Bypass)!");
 
     try {
       const response = await fetch("/api/booking/request", {
@@ -141,8 +144,10 @@ export default function DriverPortal() {
         setSelectedSpot(null);
         setLicensePlate("");
         
+        toast.success("Notification sent to host to confirm!");
+
         // Refresh bookings
-        const res = await fetch("/api/booking");
+        const res = await fetch("/api/booking", { cache: "no-store" });
         if (res.ok) {
           setMyBookings(await res.json());
         }
@@ -263,10 +268,10 @@ export default function DriverPortal() {
                       <Button
                         onClick={handleRequestBooking}
                         disabled={isLoading}
-                        className="w-full bg-accent hover:bg-accent-dark text-white space-x-2 font-semibold"
+                        className="w-full bg-[#3395FF] hover:bg-[#2084ed] text-white space-x-2 font-semibold"
                       >
-                        <Car className="h-4 w-4" />
-                        <span>{isLoading ? "Requesting..." : "Request Booking"}</span>
+                        <CreditCard className="h-4 w-4" />
+                        <span>{isLoading ? "Processing..." : "Pay with Razorpay (Test Bypass)"}</span>
                       </Button>
                     </div>
                   </div>
@@ -372,12 +377,12 @@ export default function DriverPortal() {
 
       <Dialog open={successModalOpen} onOpenChange={setSuccessModalOpen}>
         <DialogHeader>
-          <div className="w-12 h-12 bg-amber-500/10 border border-amber-500/20 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-3">
-            <Clock className="h-6 w-6 animate-pulse" />
+          <div className="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-3">
+            <ShieldCheck className="h-6 w-6" />
           </div>
-          <DialogTitle className="text-center text-xl">Request Sent to Host!</DialogTitle>
+          <DialogTitle className="text-center text-xl">Payment Successful!</DialogTitle>
           <DialogDescription className="text-center">
-            Your booking request is pending. The host will review and accept it shortly.
+            We bypassed Razorpay for testing. A notification has been sent to the host to confirm your booking.
           </DialogDescription>
         </DialogHeader>
 
@@ -397,11 +402,11 @@ export default function DriverPortal() {
             </div>
             <div className="flex justify-between">
               <span className="text-slate-400">Status:</span>
-              <Badge variant="warning" className="text-amber-500 border-amber-500">PENDING</Badge>
+              <Badge variant="warning" className="text-amber-500 border-amber-500">PENDING HOST CONFIRMATION</Badge>
             </div>
             <div className="flex justify-between border-t border-slate-100 dark:border-slate-800 pt-2 font-medium">
-              <span className="text-slate-400">Amount to Pay (Once Accepted):</span>
-              <span className="font-extrabold text-accent dark:text-accent-dark text-base">₹{bookingDetails.amount}</span>
+              <span className="text-slate-400">Amount Paid:</span>
+              <span className="font-extrabold text-emerald-500 text-base">₹{bookingDetails.amount}</span>
             </div>
           </div>
         )}

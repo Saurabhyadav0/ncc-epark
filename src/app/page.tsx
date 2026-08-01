@@ -16,7 +16,9 @@ import {
   ArrowRight,
   UserCheck,
   CheckCircle,
-  FileText
+  FileText,
+  School,
+  Award
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";

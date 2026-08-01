@@ -281,6 +281,7 @@ export default function DriverPortal() {
                 Click on any marker on the map to view coordinates, check pricing, and request bookings.
               </p>
             </div>
+          )}
           {myBookings.length > 0 && (
             <div className="mt-8 space-y-4">
               <h3 className="font-bold text-slate-900 dark:text-white">Your Bookings</h3>

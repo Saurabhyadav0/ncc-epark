@@ -348,6 +348,15 @@ export default function DriverPortal() {
                           <span className="text-xs text-slate-600 dark:text-slate-400">Phone Number:</span>
                           <span className="text-sm font-semibold text-slate-900 dark:text-white">{b.spot.phone || "No phone provided"}</span>
                         </div>
+                        <div className="pt-2">
+                          <Button 
+                            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center space-x-2"
+                            onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${b.spot.latitude},${b.spot.longitude}`, '_blank')}
+                          >
+                            <MapPin className="w-4 h-4" />
+                            <span>Navigate to Spot</span>
+                          </Button>
+                        </div>
                       </div>
                     )}
                     

@@ -7,7 +7,7 @@ interface MarkerData {
   id: string;
   position: [number, number];
   title: string;
-  type: "parking" | "ev" | "cng" | "mechanic";
+  type: "parking" | "ev" | "cng" | "mechanic" | "user";
   status?: "available" | "occupied";
   price?: number;
   info?: string;
@@ -65,6 +65,8 @@ export default function LeafletMap({ center, zoom, markers, onMarkerClick }: Lea
         iconColor = "bg-amber-500";
       } else if (item.type === "mechanic") {
         iconColor = "bg-orange-500";
+      } else if (item.type === "user") {
+        iconColor = "bg-sky-500 ring-4 ring-sky-500/30";
       }
 
       // Create a premium custom HTML icon using Leaflet DivIcon
@@ -76,6 +78,7 @@ export default function LeafletMap({ center, zoom, markers, onMarkerClick }: Lea
             ${item.type === "ev" ? "⚡" : ""}
             ${item.type === "cng" ? "⛽" : ""}
             ${item.type === "mechanic" ? "🔧" : ""}
+            ${item.type === "user" ? "📍" : ""}
             ${statusDot}
           </div>
         `,

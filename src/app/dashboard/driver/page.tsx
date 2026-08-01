@@ -28,6 +28,7 @@ export default function DriverPortal() {
   const [mapCenter, setMapCenter] = useState<[number, number]>([28.8955, 76.5892]);
   const [spots, setSpots] = useState<ParkingSpot[]>([]);
   const [myBookings, setMyBookings] = useState<any[]>([]);
+  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [selectedSpot, setSelectedSpot] = useState<ParkingSpot | null>(null);
   const [hours, setHours] = useState(2);
   const [licensePlate, setLicensePlate] = useState("");
@@ -80,7 +81,9 @@ export default function DriverPortal() {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setMapCenter([position.coords.latitude, position.coords.longitude]);
+          const coords: [number, number] = [position.coords.latitude, position.coords.longitude];
+          setMapCenter(coords);
+          setUserLocation(coords);
           setSearchQuery("Current Location");
         },
         (error) => {
@@ -275,12 +278,39 @@ export default function DriverPortal() {
               </CardContent>
             </Card>
           ) : (
-            <div className="flex-1 flex flex-col items-center justify-center text-center p-6 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl space-y-3">
-              <Car className="h-10 w-10 text-slate-300 dark:text-slate-700 animate-pulse" />
-              <h4 className="font-outfit font-semibold text-slate-700 dark:text-slate-300 text-sm">No Spot Selected</h4>
-              <p className="text-xs text-slate-400 max-w-[200px]">
-                Click on any marker on the map to view coordinates, check pricing, and request bookings.
-              </p>
+            <div className="flex-1 flex flex-col space-y-3 overflow-y-auto pr-2 pb-6">
+              <h3 className="font-bold text-slate-900 dark:text-white">Available Parking Spots</h3>
+              {spots.length > 0 ? (
+                spots.map(spot => (
+                  <Card 
+                    key={spot.id} 
+                    className="cursor-pointer hover:border-accent transition-colors border border-slate-200 dark:border-slate-800" 
+                    onClick={() => { setSelectedSpot(spot); setMapCenter(spot.position); }}
+                  >
+                    <CardContent className="p-4 flex flex-col space-y-2">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h4 className="font-bold text-sm text-slate-900 dark:text-white">{spot.title}</h4>
+                          <p className="text-xs text-slate-500 mt-1 line-clamp-1">{spot.info}</p>
+                        </div>
+                        <Badge variant="success">Available</Badge>
+                      </div>
+                      <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
+                        <span className="text-xs text-slate-500">Tap to book</span>
+                        <span className="font-bold text-accent dark:text-accent-dark">₹{spot.price}/hr</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              ) : (
+                <div className="flex-1 flex flex-col items-center justify-center text-center p-6 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl space-y-3">
+                  <Car className="h-10 w-10 text-slate-300 dark:text-slate-700 animate-pulse" />
+                  <h4 className="font-outfit font-semibold text-slate-700 dark:text-slate-300 text-sm">No Spots Found</h4>
+                  <p className="text-xs text-slate-400 max-w-[200px]">
+                    No available spots in your area currently.
+                  </p>
+                </div>
+              )}
             </div>
           )}
           {myBookings.length > 0 && (
@@ -331,7 +361,10 @@ export default function DriverPortal() {
           <Map
             center={mapCenter}
             zoom={14}
-            markers={spots}
+            markers={[
+              ...spots,
+              ...(userLocation ? [{ id: "user-loc", position: userLocation, title: "Your Location", type: "user" as const }] : [])
+            ]}
             onMarkerClick={handleSpotSelect}
           />
         </div>

@@ -7,7 +7,7 @@ interface MarkerData {
   id: string;
   position: [number, number];
   title: string;
-  type: "parking" | "ev" | "cng" | "mechanic";
+  type: "parking" | "ev" | "cng" | "mechanic" | "user";
   status?: "available" | "occupied";
   price?: number;
   info?: string;

@@ -71,69 +71,47 @@ export default function Dashboard() {
         <div className="space-y-6">
           <h2 className="text-xl font-bold font-outfit text-slate-900 dark:text-white">Choose Your Workspace Mode</h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             
             {/* Driver Card */}
-            <Card className="border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-md transition-all">
+            <Card className="border-2 border-slate-200 dark:border-slate-800 hover:border-accent dark:hover:border-accent-dark hover:shadow-lg transition-all cursor-pointer group">
               <CardHeader>
-                <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500 mb-2">
-                  <Car className="h-6 w-6" />
+                <div className="w-14 h-14 rounded-full bg-blue-500/10 group-hover:bg-blue-500/20 flex items-center justify-center text-blue-500 mb-4 transition-colors">
+                  <Car className="h-7 w-7" />
                 </div>
-                <CardTitle>Driver Portal</CardTitle>
-                <CardDescription>Search and book parking spots in real-time</CardDescription>
+                <CardTitle className="text-2xl">Book a Parking Spot</CardTitle>
+                <CardDescription className="text-base">Find nearby parking instantly using your location</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-6">
                 <p className="text-sm text-slate-500 dark:text-slate-400">
-                  Access our interactive map to find parking spots (formal and P2P driveways). Reserve your spot instantly and pay safely via Razorpay integration.
+                  Access our interactive map to find parking spots. We automatically detect your location to show the closest available formal and P2P driveways.
                 </p>
-                <Link href="/dashboard/driver">
-                  <Button className="w-full justify-between mt-2">
+                <Link href="/dashboard/driver" className="block">
+                  <Button size="lg" className="w-full justify-between mt-2 font-bold text-md">
                     <span>Find & Book Spot</span>
-                    <ArrowRight className="h-4 w-4" />
+                    <ArrowRight className="h-5 w-5" />
                   </Button>
                 </Link>
               </CardContent>
             </Card>
 
             {/* Owner Card */}
-            <Card className="border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-md transition-all">
+            <Card className="border-2 border-slate-200 dark:border-slate-800 hover:border-emerald-500 dark:hover:border-emerald-500 hover:shadow-lg transition-all cursor-pointer group">
               <CardHeader>
-                <div className="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500 mb-2">
-                  <PlusCircle className="h-6 w-6" />
+                <div className="w-14 h-14 rounded-full bg-emerald-500/10 group-hover:bg-emerald-500/20 flex items-center justify-center text-emerald-500 mb-4 transition-colors">
+                  <PlusCircle className="h-7 w-7" />
                 </div>
-                <CardTitle>P2P Land Owner</CardTitle>
-                <CardDescription>Monetize driveways, garages, and vacant plots</CardDescription>
+                <CardTitle className="text-2xl">Create / List a Spot</CardTitle>
+                <CardDescription className="text-base">Monetize your empty driveway or garage</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-6">
                 <p className="text-sm text-slate-500 dark:text-slate-400">
-                  List your idle residential or commercial spaces. Set custom hourly pricing, define availability slots, and track passive household earnings.
+                  List your idle residential or commercial spaces. Set custom hourly pricing, define availability slots, and start generating passive income today.
                 </p>
-                <Link href="/dashboard/owner">
-                  <Button variant="accent" className="w-full justify-between mt-2 bg-accent hover:bg-accent-dark">
-                    <span>Manage Listings</span>
-                    <ArrowRight className="h-4 w-4" />
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-
-            {/* Services Card */}
-            <Card className="border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-md transition-all">
-              <CardHeader>
-                <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500 mb-2">
-                  <BatteryCharging className="h-6 w-6" />
-                </div>
-                <CardTitle>Vehicle Services</CardTitle>
-                <CardDescription>Locate nearby EV charger ports, CNG, and mechanics</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-sm text-slate-500 dark:text-slate-400">
-                  Out on a road trip? Check locations of EV charging grids, local CNG pumps, and top-rated vehicle breakdown mechanics on a map.
-                </p>
-                <Link href="/dashboard/services">
-                  <Button variant="secondary" className="w-full justify-between mt-2">
-                    <span>Locate Services</span>
-                    <ArrowRight className="h-4 w-4" />
+                <Link href="/dashboard/owner" className="block">
+                  <Button size="lg" variant="accent" className="w-full justify-between mt-2 bg-accent hover:bg-accent-dark font-bold text-md text-white">
+                    <span>Create a Listing</span>
+                    <ArrowRight className="h-5 w-5" />
                   </Button>
                 </Link>
               </CardContent>

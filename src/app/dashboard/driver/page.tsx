@@ -23,7 +23,8 @@ interface ParkingSpot {
 }
 
 export default function DriverPortal() {
-  const [searchQuery, setSearchQuery] = useState("Faridabad Sector 14");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [mapCenter, setMapCenter] = useState<[number, number]>([28.4089, 77.3178]);
   const [spots, setSpots] = useState<ParkingSpot[]>([]);
   const [selectedSpot, setSelectedSpot] = useState<ParkingSpot | null>(null);
   const [hours, setHours] = useState(2);
@@ -55,7 +56,24 @@ export default function DriverPortal() {
       }
     };
     fetchSpots();
+
+    // Automatically get user location on load
+    handleGetLocation();
   }, []);
+
+  const handleGetLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setMapCenter([position.coords.latitude, position.coords.longitude]);
+          setSearchQuery("Current Location");
+        },
+        (error) => {
+          console.error("Error getting location", error);
+        }
+      );
+    }
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -131,20 +149,31 @@ export default function DriverPortal() {
             </p>
           </div>
 
-          <form onSubmit={handleSearch} className="flex gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-3.5 h-4 w-4 text-slate-400" />
-              <Input
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search area..."
-                className="pl-9"
-              />
-            </div>
-            <Button type="submit" variant="secondary" className="px-3">
-              Search
+          <div className="flex gap-2">
+            <form onSubmit={handleSearch} className="flex-1 flex gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-3.5 h-4 w-4 text-slate-400" />
+                <Input
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search area..."
+                  className="pl-9"
+                />
+              </div>
+              <Button type="submit" variant="secondary" className="px-3">
+                Search
+              </Button>
+            </form>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={handleGetLocation}
+              title="Use Current Location"
+              className="px-3 text-accent border-accent/30 hover:bg-accent/10"
+            >
+              <MapPin className="h-5 w-5" />
             </Button>
-          </form>
+          </div>
 
           {selectedSpot ? (
             <Card className="border border-slate-200 dark:border-slate-800 animate-in fade-in-40 slide-in-from-bottom-2">
@@ -238,7 +267,7 @@ export default function DriverPortal() {
         {/* Right Side: Maps Frame */}
         <div className="flex-1 min-h-[450px] md:min-h-0 relative">
           <Map
-            center={[28.4089, 77.3178]}
+            center={mapCenter}
             zoom={14}
             markers={spots}
             onMarkerClick={handleSpotSelect}
